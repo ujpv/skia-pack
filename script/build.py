@@ -83,6 +83,8 @@ def main():
             'extra_cflags_cc=["-fno-exceptions", "-fno-rtti","-D_GLIBCXX_USE_CXX11_ABI=0"]',
             'cc="gcc-9"',
             'cxx="g++-9"',
+            'skia_use_vulkan=true',
+            'skia_enable_graphite=true'
         ]
   elif 'windows' == target:
     args += [

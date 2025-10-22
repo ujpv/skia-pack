@@ -89,6 +89,16 @@ def main():
               dirs.add(dir)
           zip.write(str(path))
 
+  extract_dir = 'Skia-' + version + '-' + target + '-' + build_type + '-' + machine + classifier
+  extract_path = os.path.join(os.pardir, extract_dir)
+  print('> Extracting to', extract_dir)
+  if os.path.exists(extract_path):
+      print('> Removing existing directory ' + extract_path)
+      os.rmdir(extract_path)
+  with zipfile.ZipFile(os.path.join(os.pardir, dist), 'r') as zip:
+    zip.extractall(extract_path)
+  print('> Extraction complete')
+
   return 0
 
 if __name__ == '__main__':
