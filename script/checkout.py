@@ -21,6 +21,23 @@ def checkout_skia(commit):
   print("> Checking out", commit)
   subprocess.check_call(["git", "-c", "advice.detachedHead=false", "checkout", commit])
 
+def prefetch_deps(deps_dict):
+    for path, url_with_revision in deps_dict.items():
+        if os.path.exists(path):
+            continue
+        if not str(url_with_revision).startswith('https://'):
+            continue
+        url, revision = url_with_revision.split('@')
+        print("> Fetching {}".format(url))
+        subprocess.check_call(["git", "clone", url, path])
+        subprocess.check_call(["git", "-C", path, "checkout", revision])
+
+def parse_deps_file_to_dict(path):
+    dictionary = {}
+    with open(path) as f:
+      exec('def Var(x): return vars[x]\n' + f.read(), dictionary)
+    return dictionary
+
 def git_sync_with_retries(max_retries=3, backoff_seconds=5):
     attempt = 0
     while True:
@@ -30,9 +47,9 @@ def git_sync_with_retries(max_retries=3, backoff_seconds=5):
             if common.host() == 'windows':
                 env = os.environ.copy()
                 env['PYTHONHTTPSVERIFY'] = '0'
-                subprocess.check_call([sys.executable, "tools/git-sync-deps"], env=env)
+                subprocess.check_call([sys.executable, "tools/git-sync-deps", "--no-parallel", "--jobs=1"], env=env)
             else:
-                subprocess.check_call([sys.executable, "tools/git-sync-deps"])
+                subprocess.check_call([sys.executable, "tools/git-sync-deps", "--no-parallel", "--jobs=1"])
             print("Success")
             break
         except subprocess.CalledProcessError as e:
@@ -46,7 +63,8 @@ def git_sync_with_retries(max_retries=3, backoff_seconds=5):
                 time.sleep(wait)
 
 def main():
-  os.chdir(os.path.join(os.path.dirname(__file__), os.pardir))
+  join = os.path.join(os.path.dirname(__file__), os.pardir)
+  os.chdir(join)
 
   parser = common.create_parser(True)
   args = parser.parse_args()
@@ -61,6 +79,9 @@ def main():
 
   commit = match.group(2)
   checkout_skia(commit)
+
+  parsed_deps = parse_deps_file_to_dict("DEPS")
+  prefetch_deps(parsed_deps.get("deps"))
 
   # git deps
   print("> Running tools/git-sync-deps")
