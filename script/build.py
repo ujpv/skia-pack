@@ -75,6 +75,8 @@ def main():
             'extra_cflags_cc=["-fno-exceptions", "-fno-rtti", "-flax-vector-conversions=all", "-D_GLIBCXX_USE_CXX11_ABI=0"]',
             'cc="clang"',
             'cxx="clang++"',
+            'skia_use_vulkan=true',
+            'skia_enable_graphite=true'
         ]
     else:
         args += [
