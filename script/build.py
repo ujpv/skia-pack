@@ -21,7 +21,7 @@ def main():
   isMacos = 'macos' == target
 
   if build_type == 'Debug':
-    args = ['is_debug=true']
+    args = ['is_debug=true', 'skia_enable_vulkan_debug_layers = true']
   else:
     args = ['is_official_build=true']
 
